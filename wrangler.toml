@@ -1,0 +1,13 @@
+name = "upi-payments"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+workers_dev = false
+
+[[d1_databases]]
+binding = "DB"
+database_name = "upi-pay"
+database_id = "81613b12-bf1c-4b9a-b3eb-10cf17669878"
+
+[[routes]]
+pattern = "pay.dsremo.com"
+custom_domain = true
