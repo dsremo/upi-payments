@@ -14,11 +14,25 @@ export default {
     const path = url.pathname;
     const method = request.method;
 
+    if (method === "GET" && (path === "/favicon.svg" || path === "/favicon.ico")) {
+      const faviconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64"><rect width="64" height="64" rx="14" fill="#2f81f7"/><text x="32" y="34" font-family="Arial,sans-serif" font-weight="700" font-size="38" fill="#fff" text-anchor="middle" dominant-baseline="central">₹</text></svg>`;
+      return new Response(faviconSvg, { headers: { "content-type": "image/svg+xml", "cache-control": "public, max-age=86400" } });
+    }
+    if (method === "GET" && path === "/robots.txt") {
+      return new Response("User-agent: *\nAllow: /\nSitemap: https://pay.dsremo.com/sitemap.xml\n", { headers: { "content-type": "text/plain; charset=utf-8" } });
+    }
+    if (method === "GET" && path === "/sitemap.xml") {
+      return new Response('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url><loc>https://pay.dsremo.com/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>\n<url><loc>https://pay.dsremo.com/checkout</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>\n</urlset>\n', { headers: { "content-type": "application/xml; charset=utf-8" } });
+    }
+
     try {
-      if (method === "GET" && path === "/") return json(apiInfo());
+      if (method === "GET" && path === "/") {
+        return new Response(LANDING_HTML, { headers: { "content-type": "text/html; charset=utf-8" } });
+      }
       if (method === "GET" && path === "/checkout") {
         return new Response(CHECKOUT_HTML, { headers: { "content-type": "text/html; charset=utf-8" } });
       }
+      if (method === "GET" && path === "/api") return json(apiInfo());
       if (method === "GET" && path === "/api/health") return json({ ok: true });
       if (method === "POST" && path === "/api/payments") return createPayment(request, env);
       if (method === "POST" && path === "/api/verify-payment") return verifyPayment(request, env);
@@ -473,9 +487,93 @@ function json(data, status = 200) {
   });
 }
 
+const LANDING_HTML = `<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Payment Orchestrator — pay.dsremo.com</title>
+<meta name="description" content="A production-shaped payment orchestration service — idempotent API, an enforced state machine, HMAC signature verification, refunds, and signed webhooks. Live checkout demo + API.">
+<link rel="canonical" href="https://pay.dsremo.com/">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#2f81f7">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Payment Orchestrator">
+<meta property="og:title" content="Payment Orchestrator — pay.dsremo.com">
+<meta property="og:description" content="A production-shaped payment orchestration service — idempotent API, enforced state machine, HMAC verification, refunds, and signed webhooks.">
+<meta property="og:url" content="https://pay.dsremo.com/">
+<meta property="og:image" content="https://pay.dsremo.com/favicon.svg">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/favicon.svg">
+<style>
+  :root{--bg:#0d1117;--card:#161b22;--line:#30363d;--ink:#e6edf3;--mut:#8b949e;--accent:#2f81f7;--good:#3fb950}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,sans-serif;line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:54px 24px 72px}
+  .live{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--good);font-family:ui-monospace,Menlo,monospace;letter-spacing:.06em;text-transform:uppercase}
+  .live .dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 3px rgba(63,185,80,.18)}
+  h1{font-size:clamp(28px,5vw,36px);margin:14px 0 8px;letter-spacing:-.02em}
+  .sub{color:var(--mut);font-size:17px;margin:0 0 28px;max-width:62ch}
+  .cta{display:flex;gap:12px;flex-wrap:wrap;margin:0 0 8px}
+  .btn{text-decoration:none;font-size:14px;font-weight:600;padding:12px 20px;border-radius:8px;background:var(--accent);color:#fff;border:1px solid var(--accent);transition:filter .15s}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn:hover{filter:brightness(1.1)}
+  h2{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--mut);font-family:ui-monospace,Menlo,monospace;margin:38px 0 14px;font-weight:600}
+  .feat{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .feat div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .feat b{display:block;margin-bottom:3px;font-size:14px}
+  .feat span{color:var(--mut);font-size:13px}
+  table{width:100%;border-collapse:collapse;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:0}
+  .m{color:var(--accent);white-space:nowrap;font-weight:600}
+  .d{color:var(--mut)}
+  .stack{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--mut);margin-top:12px}
+  footer{margin-top:42px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--mut)}
+  footer a{color:var(--accent);text-decoration:none}
+  @media(max-width:560px){.feat{grid-template-columns:1fr}}
+</style></head><body>
+<div class="wrap">
+  <span class="live"><span class="dot"></span> Live &middot; pay.dsremo.com</span>
+  <h1>Payment Orchestrator</h1>
+  <p class="sub">A production-shaped payment service: idempotent creation, a server-enforced state machine, HMAC signature verification, full and partial refunds, and signed webhooks. Runs a mock gateway for the public demo, with a real Razorpay (test-mode) adapter wired in.</p>
+  <div class="cta">
+    <a class="btn" href="/checkout">Try the live checkout demo &rarr;</a>
+    <a class="btn ghost" href="https://github.com/dsremo/pay-service" target="_blank" rel="noopener">View the code</a>
+  </div>
+
+  <h2>What it does</h2>
+  <div class="feat">
+    <div><b>Idempotent API</b><span>An Idempotency-Key header dedupes retried payment creation.</span></div>
+    <div><b>Enforced state machine</b><span>created &rarr; pending &rarr; success / failed / expired, server-side only.</span></div>
+    <div><b>HMAC verification</b><span>Timing-safe SHA-256 signature checks on callbacks and webhooks.</span></div>
+    <div><b>Refunds</b><span>Full or partial, guarded against over-refund.</span></div>
+    <div><b>Signed webhooks</b><span>Verified gateway events reconcile payment status.</span></div>
+    <div><b>Multi-gateway</b><span>Mock gateway for the demo; Razorpay test adapter pluggable.</span></div>
+  </div>
+
+  <h2>API</h2>
+  <table>
+    <tr><td class="m">POST&nbsp;/api/payments</td><td class="d">Create a payment (Idempotency-Key header dedupes).</td></tr>
+    <tr><td class="m">GET&nbsp;/api/payments/:id</td><td class="d">Payment status + full event history.</td></tr>
+    <tr><td class="m">POST&nbsp;/api/payments/:id/refund</td><td class="d">Full or partial refund.</td></tr>
+    <tr><td class="m">GET&nbsp;/api/refunds/:id</td><td class="d">Refund status.</td></tr>
+    <tr><td class="m">POST&nbsp;/api/webhook</td><td class="d">Gateway webhook (HMAC-SHA256 verified).</td></tr>
+    <tr><td class="m">POST&nbsp;/api/verify-payment</td><td class="d">Verify a Razorpay client callback signature.</td></tr>
+  </table>
+
+  <p class="stack">Cloudflare Workers &middot; D1 (SQLite) &middot; Web Crypto &middot; Razorpay</p>
+
+  <footer>
+    Built by <a href="https://ashutosh.dsremo.com">Ashutosh Tiwari</a>
+    &middot; <a href="https://github.com/dsremo/pay-service" target="_blank" rel="noopener">source</a>
+    &middot; <a href="/api">raw API JSON</a>
+  </footer>
+</div>
+</body></html>`;
+
 const CHECKOUT_HTML = `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>UPI Checkout — demo</title>
+<title>Checkout — pay.dsremo.com demo</title>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <style>
   body{margin:0;background:#0d1117;color:#e6edf3;font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh}
@@ -490,11 +588,11 @@ const CHECKOUT_HTML = `<!doctype html><html lang="en"><head><meta charset="utf-8
   .ok{color:#3fb950}.bad{color:#f85149}.muted{color:#8b949e}
 </style></head><body>
 <div class="card">
-  <h1>UPI Checkout</h1>
-  <p class="sub">pay.dsremo.com — demo</p>
+  <h1>Checkout</h1>
+  <p class="sub">pay.dsremo.com — live demo</p>
   <label for="amt">Amount (₹)</label>
   <input id="amt" type="number" value="149" min="1">
-  <button id="pay">Pay via UPI</button>
+  <button id="pay">Pay now</button>
   <div class="status muted" id="status"></div>
 </div>
 <script>
