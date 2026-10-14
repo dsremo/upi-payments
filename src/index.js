@@ -564,7 +564,7 @@ const LANDING_HTML = `<!doctype html><html lang="en"><head><meta charset="utf-8"
   <p class="stack">Cloudflare Workers &middot; D1 (SQLite) &middot; Web Crypto &middot; Razorpay</p>
 
   <footer>
-    Built by <a href="https://ashutosh.dsremo.com">Ashutosh Tiwari</a>
+    Built by Ashutosh Tiwari
     &middot; <a href="https://github.com/dsremo/pay-service" target="_blank" rel="noopener">source</a>
     &middot; <a href="/api">raw API JSON</a>
   </footer>
